@@ -63,6 +63,9 @@
     <postStartupActivity implementation="com.maddyhome.idea.vim.PluginStartup" order="first"/>
 
     <editorFloatingToolbarProvider implementation="com.maddyhome.idea.vim.ui.ReloadFloatingToolbar"/>
+
+    <fileType name="Vim file" implementationClass="dev.feedforward.vim.lang.VimFileType" fieldName="INSTANCE" language="VimL" extensions="vim"/>
+    <lang.parserDefinition language="VimL" implementationClass="dev.feedforward.vim.lang.VimParserDefinition"/>
   </extensions>
 
   <xi:include href="/META-INF/includes/ApplicationServices.xml" xpointer="xpointer(/idea-plugin/*)"/>

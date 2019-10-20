@@ -22,7 +22,12 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.extensions.ExtensionPointName;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.ThrowableComputable;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiFileFactory;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.maddyhome.idea.vim.VimPlugin;
 import com.maddyhome.idea.vim.command.SelectionType;
 import com.maddyhome.idea.vim.common.Register;
@@ -33,6 +38,7 @@ import com.maddyhome.idea.vim.ex.ranges.Ranges;
 import com.maddyhome.idea.vim.group.HistoryGroup;
 import com.maddyhome.idea.vim.helper.MessageHelper;
 import com.maddyhome.idea.vim.helper.Msg;
+import dev.feedforward.vim.lang.VimFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -158,22 +164,43 @@ public class CommandParser {
       return;
     }
 
-    // Parse the command
-    final ExCommand command = parse(cmd);
-    final CommandHandler handler = getCommandHandler(command);
 
+    Project project = editor.getProject();
+    ExCommand exCommand = null;
+    CommandHandler commandHandler = null;
+    if (project != null) {
+      PsiFile elements =
+        PsiFileFactory.getInstance(project).createFileFromText("x.vim", VimFileType.INSTANCE, cmd);
+      if (!PsiTreeUtil.hasErrorElements(elements)) {
+        PsiElement child = elements.getFirstChild();
+        String commandName = child.getFirstChild().getText();
+        exCommand = new ExPsiCommand(commandName, child);
+        commandHandler = getCommandHandler(exCommand);
+        if (!(commandHandler instanceof CommandHandler.PsiExecution)) {
+          exCommand = null;
+        }
+      }
+    }
+    if (exCommand == null) {
+      // Parse the command
+      exCommand = parse(cmd);
+      commandHandler = getCommandHandler(exCommand);
+    }
+
+    // Run the command
+    final CommandHandler handler = commandHandler;
     if (handler == null) {
-      final String message = MessageHelper.message(Msg.NOT_EX_CMD, command.getCommand());
+      final String message = MessageHelper.message(Msg.NOT_EX_CMD, exCommand.getCommand());
       throw new InvalidCommandException(message, cmd);
     }
+
+    final ExCommand command = exCommand;
 
     if (handler.getArgFlags().getAccess() == CommandHandler.Access.WRITABLE && !editor.getDocument().isWritable()) {
       VimPlugin.indicateError();
       logger.info("Trying to modify readonly document");
       return;
     }
-
-    // Run the command
 
     ThrowableComputable<Object, ExException> runCommand = () -> {
       boolean ok = handler.process(editor, context, command, count);

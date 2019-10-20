@@ -22,6 +22,7 @@ import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.Ref
+import com.intellij.psi.PsiElement
 import com.maddyhome.idea.vim.VimPlugin
 import com.maddyhome.idea.vim.command.CommandFlags
 import com.maddyhome.idea.vim.helper.MessageHelper
@@ -45,6 +46,10 @@ sealed class CommandHandler {
 
   abstract class SingleExecution : CommandHandler() {
     abstract fun execute(editor: Editor, context: DataContext, cmd: ExCommand): Boolean
+  }
+
+  abstract class PsiExecution : CommandHandler() {
+    abstract fun execute(editor: Editor, context: DataContext, cmd: PsiElement): Boolean
   }
 
   enum class RangeFlag {
@@ -165,6 +170,13 @@ sealed class CommandHandler {
           var i = 0
           while (i++ < count && res.get()) {
             res.set(execute(editor, context, cmd))
+          }
+        }
+        is PsiExecution -> {
+          val psiCommand = cmd as ExPsiCommand
+          var i = 0
+          while (i++ < count && res.get()) {
+            res.set(execute(editor, context, psiCommand.element))
           }
         }
       }

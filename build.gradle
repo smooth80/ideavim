@@ -48,11 +48,13 @@ intellij {
 
 repositories {
   mavenCentral()
+  mavenLocal()
 }
 
 dependencies {
   compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
   compileOnly "org.jetbrains:annotations:19.0.0"
+  compile "dev.feedforward:VimLanguage:0.0.1"
 }
 
 compileKotlin {

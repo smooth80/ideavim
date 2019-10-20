@@ -23,7 +23,7 @@ import com.maddyhome.idea.vim.common.TextRange
 import com.maddyhome.idea.vim.ex.ranges.LineRange
 import com.maddyhome.idea.vim.ex.ranges.Ranges
 
-class ExCommand(val ranges: Ranges, val command: String, var argument: String) {
+open class ExCommand(val ranges: Ranges, val command: String, var argument: String) {
 
   fun getLine(editor: Editor): Int = ranges.getLine(editor)
 
