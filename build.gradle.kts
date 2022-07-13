@@ -54,7 +54,7 @@ dependencies {
     testImplementation("com.ensarsarajcic.neovim.java:neovim-api:0.2.3")
     testImplementation("com.ensarsarajcic.neovim.java:core-rpc:0.2.3")
 
-    testImplementation("com.intellij.remoterobot:remote-robot:0.11.4")
+    testImplementation("com.intellij.remoterobot:remote-robot:0.11.15")
     testImplementation("com.intellij.remoterobot:remote-fixtures:1.1.18")
 }
 
